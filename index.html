@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Minha Evolução</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0f17;
+      --card: rgba(23, 27, 44, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #a855f7;
+      --primary-gradient: linear-gradient(135deg, #a855f7, #ec4899);
+      --pink-subtle: rgba(236, 72, 153, 0.15);
+      --text: #f8fafc;
+      --text-sub: #94a3b8;
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      -webkit-tap-highlight-color: transparent;
+      word-break: break-word;
+    }
+    
+    html, body {
+      width: 100%;
+      overflow-x: hidden;
+      background-color: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      padding-bottom: 95px;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(168, 85, 247, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+
+    .app-header {
+      padding: 16px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(13, 15, 23, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--card-border);
+      width: 100%;
+    }
+    
+    .app-header h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .container { 
+      padding: 0 14px; 
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .hero-card {
+      background: var(--primary-gradient);
+      border-radius: 20px;
+      padding: 16px;
+      margin: 14px 0;
+      box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.3);
+    }
+    .hero-card p { font-size: 0.78rem; font-weight: 500; opacity: 0.9; }
+    .hero-card h2 { font-size: 1.15rem; font-weight: 800; margin-top: 2px; }
+
+    .kpi-main-card {
+      background: var(--card);
+      border: 1px solid rgba(236, 72, 153, 0.3);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .kpi-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0;
+    }
+    
+    .kpi-title { font-size: 0.65rem; color: var(--text-sub); text-transform: uppercase; font-weight: 700; letter-spacing: 0.3px; }
+    .kpi-value { font-size: 1.25rem; font-weight: 800; margin-top: 2px; color: #fff; white-space: nowrap; min-height: 1.5rem; }
+    
+    .kpi-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 3px 6px;
+      border-radius: 10px;
+      background: var(--pink-subtle);
+      color: #f472b6;
+      margin-top: 6px;
+      width: fit-content;
+      max-width: 100%;
+      min-height: 1.2rem;
+    }
+
+    .section-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 16px;
+      width: 100%;
+    }
+
+    .section-title { 
+      font-size: 0.9rem; 
+      font-weight: 700; 
+      margin-bottom: 10px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+    }
+
+    /* Botões Discretos de Backup */
+    .backup-actions { display: flex; gap: 8px; }
+    .btn-icon-subtle {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-sub);
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pill-selector { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 6px; 
+      margin-bottom: 12px; 
+    }
+    
+    .pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid transparent;
+      color: var(--text-sub);
+      padding: 6px 10px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1 1 auto;
+      text-align: center;
+    }
+    .pill.active { background: var(--primary-gradient); color: #fff; }
+
+    .chart-box { height: 200px; width: 100%; position: relative; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(13, 15, 23, 0.95);
+      backdrop-filter: blur(18px);
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0 20px;
+      z-index: 100;
+      width: 100%;
+    }
+
+    .nav-item {
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;
+    }
+    .nav-item svg { width: 20px; height: 20px; fill: currentColor; }
+    .nav-item.active { color: #f472b6; }
+
+    .form-group { margin-bottom: 12px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    label { display: block; font-size: 0.7rem; color: var(--text-sub); margin-bottom: 4px; font-weight: 600; }
+    
+    input, select {
+      width: 100%;
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 10px;
+      color: #fff;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--primary-gradient);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+
+    .history-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .history-head { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      font-size: 0.78rem; 
+      font-weight: 700; 
+      color: #f472b6; 
+      margin-bottom: 8px; 
+    }
+    .history-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; font-size: 0.7rem; }
+    .history-item { background: rgba(0,0,0,0.25); padding: 6px; border-radius: 8px; text-align: center; }
+    .history-item span { display: block; color: var(--text-sub); font-size: 0.6rem; margin-bottom: 2px; }
+    .mood-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 8px; background: rgba(168, 85, 247, 0.2); color: #c084fc; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="app-header">
+    <h1>Evolução & Bem-Estar ✨</h1>
+  </div>
+
+  <div class="container">
+    <!-- ABA 1: DASHBOARD -->
+    <div id="tab-dashboard" class="tab-content active">
+      
+      <div class="hero-card">
+        <p>Orgulho da sua jornada!</p>
+        <h2>Cada passo conta 🌸</h2>
+      </div>
+
+      <!-- Card Destaque: Peso -->
+      <div class="kpi-main-card">
+        <div>
+          <div class="kpi-title">Peso Atual</div>
+          <div class="kpi-value" id="kpiWeight"></div>
+        </div>
+        <div style="text-align: right;">
+          <div class="kpi-title">Evolução Total</div>
+          <div class="kpi-badge" id="kpiWeightDiff"></div>
+        </div>
+      </div>
+
+      <!-- Grid Duplo: Cintura e Abdômen -->
+      <div class="kpi-grid-2">
+        <div class="kpi-card">
+          <div>
+            <div class="kpi-title">Cintura</div>
+            <div class="kpi-value" id="kpiWaist"></div>
+          </div>
+          <div class="kpi-badge" id="kpiWaistDiff">Silhueta</div>
+        </div>
+
+        <div class="kpi-card">
+          <div>
+            <div class="kpi-title">Abdômen</div>
+            <div class="kpi-value" id="kpiAbdomen"></div>
+          </div>
+          <div class="kpi-badge" id="kpiAbdomenDiff">Central</div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title">Visualizar Progresso</div>
+        <div class="pill-selector">
+          <button class="pill active" onclick="switchMetric('weight', this)">Peso</button>
+          <button class="pill" onclick="switchMetric('waist', this)">Cintura</button>
+          <button class="pill" onclick="switchMetric('abdomen', this)">Abdômen</button>
+          <button class="pill" onclick="switchMetric('hip', this)">Quadril</button>
+        </div>
+        <div class="chart-box">
+          <canvas id="mobileChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA 2: NOVO REGISTRO -->
+    <div id="tab-add" class="tab-content">
+      <div class="section-card">
+        <div class="section-title">Anotar Medições</div>
+        <form id="trackerForm">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Data</label>
+              <input type="date" id="date" required>
+            </div>
+            <div class="form-group">
+              <label>Sentimento</label>
+              <select id="mood">
+                <option value="Ótima ✨">Ótima ✨</option>
+                <option value="Com foco 💪">Com foco 💪</option>
+                <option value="Retida 💧">Retida 💧</option>
+                <option value="Cansada 😴">Cansada 😴</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Peso (kg)</label>
+              <input type="number" step="0.1" id="weight" placeholder="0.0" required>
+            </div>
+            <div class="form-group">
+              <label>Cintura (cm)</label>
+              <input type="number" step="0.1" id="waist" placeholder="0.0">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Abdômen (cm)</label>
+              <input type="number" step="0.1" id="abdomen" placeholder="0.0">
+            </div>
+            <div class="form-group">
+              <label>Quadril (cm)</label>
+              <input type="number" step="0.1" id="hip" placeholder="0.0">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Busto (cm)</label>
+              <input type="number" step="0.1" id="chest">
+            </div>
+            <div class="form-group">
+              <label>Braço Dir. (cm)</label>
+              <input type="number" step="0.1" id="armRight">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Coxa Dir. (cm)</label>
+              <input type="number" step="0.1" id="thighRight">
+            </div>
+            <div class="form-group">
+              <label>Panturrilha (cm)</label>
+              <input type="number" step="0.1" id="calf">
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit">Salvar Medição</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ABA 3: HISTÓRICO -->
+    <div id="tab-history" class="tab-content">
+      <div class="section-card">
+        <div class="section-title">
+          <span>Diário de Medições</span>
+          <div class="backup-actions">
+            <button class="btn-icon-subtle" title="Baixar Backup" onclick="exportBackup()">📥</button>
+            <button class="btn-icon-subtle" title="Restaurar Backup" onclick="document.getElementById('importFile').click()">📤</button>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
+          </div>
+        </div>
+        <div id="historyList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('tab-dashboard', this)">
+      <svg viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
+      Painel
+    </button>
+    <button class="nav-item" onclick="switchTab('tab-add', this)">
+      <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      Anotar
+    </button>
+    <button class="nav-item" onclick="switchTab('tab-history', this)">
+      <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+      Histórico
+    </button>
+  </div>
+
+  <script>
+    document.getElementById('date').valueAsDate = new Date();
+    let records = JSON.parse(localStorage.getItem('home_tracker_records') || '[]');
+    let currentMetric = 'weight';
+    let chart;
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function switchMetric(metric, btn) {
+      currentMetric = metric;
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      updateUI();
+    }
+
+    function initChart() {
+      const ctx = document.getElementById('mobileChart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            data: [],
+            borderColor: '#ec4899',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            backgroundColor: (context) => {
+              const bg = context.chart.ctx.createLinearGradient(0, 0, 0, 180);
+              bg.addColorStop(0, 'rgba(236, 72, 153, 0.25)');
+              bg.addColorStop(1, 'rgba(236, 72, 153, 0.0)');
+              return bg;
+            },
+            pointRadius: 4,
+            pointBackgroundColor: '#a855f7'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 9 } } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 9 } } }
+          }
+        }
+      });
+      updateUI();
+    }
+
+    function updateUI() {
+      records.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      if (records.length > 0) {
+        const latest = records[records.length - 1];
+        const first = records[0];
+
+        document.getElementById('kpiWeight').innerText = latest.weight ? `${latest.weight} kg` : '';
+        document.getElementById('kpiWaist').innerText = latest.waist ? `${latest.waist} cm` : '';
+        document.getElementById('kpiAbdomen').innerText = latest.abdomen ? `${latest.abdomen} cm` : '';
+
+        const weightDiff = (latest.weight - first.weight).toFixed(1);
+        document.getElementById('kpiWeightDiff').innerText = weightDiff <= 0 ? `${weightDiff} kg` : `+${weightDiff} kg`;
+
+        if (latest.waist && first.waist) {
+          const waistDiff = (latest.waist - first.waist).toFixed(1);
+          document.getElementById('kpiWaistDiff').innerText = waistDiff <= 0 ? `${waistDiff} cm` : `+${waistDiff} cm`;
+        } else {
+          document.getElementById('kpiWaistDiff').innerText = 'Silhueta';
+        }
+
+        if (latest.abdomen && first.abdomen) {
+          const abdDiff = (latest.abdomen - first.abdomen).toFixed(1);
+          document.getElementById('kpiAbdomenDiff').innerText = abdDiff <= 0 ? `${abdDiff} cm` : `+${abdDiff} cm`;
+        } else {
+          document.getElementById('kpiAbdomenDiff').innerText = 'Central';
+        }
+      } else {
+        document.getElementById('kpiWeight').innerText = '';
+        document.getElementById('kpiWaist').innerText = '';
+        document.getElementById('kpiAbdomen').innerText = '';
+        document.getElementById('kpiWeightDiff').innerText = '';
+      }
+
+      chart.data.labels = records.map(r => new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
+      chart.data.datasets[0].data = records.map(r => r[currentMetric] || null);
+      chart.update();
+
+      const historyList = document.getElementById('historyList');
+      historyList.innerHTML = records.map((r, index) => `
+        <div class="history-card">
+          <div class="history-head">
+            <span>${new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR')} ${r.mood ? `<span class="mood-tag">${r.mood}</span>` : ''}</span>
+            <span style="color: #ef4444; cursor: pointer;" onclick="deleteRecord(${index})">✕</span>
+          </div>
+          <div class="history-details">
+            <div class="history-item"><span>Peso</span><b>${r.weight ? r.weight + ' kg' : ' '}</b></div>
+            <div class="history-item"><span>Cintura</span><b>${r.waist ? r.waist + ' cm' : ' '}</b></div>
+            <div class="history-item"><span>Abdômen</span><b>${r.abdomen ? r.abdomen + ' cm' : ' '}</b></div>
+          </div>
+        </div>
+      `).reverse().join('');
+
+      localStorage.setItem('home_tracker_records', JSON.stringify(records));
+    }
+
+    document.getElementById('trackerForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const getV = id => document.getElementById(id).value ? parseFloat(document.getElementById(id).value) : null;
+
+      records.push({
+        date: document.getElementById('date').value,
+        mood: document.getElementById('mood').value,
+        weight: parseFloat(document.getElementById('weight').value),
+        waist: getV('waist'),
+        abdomen: getV('abdomen'),
+        hip: getV('hip'),
+        chest: getV('chest'),
+        armRight: getV('armRight'),
+        thighRight: getV('thighRight'),
+        calf: getV('calf')
+      });
+
+      updateUI();
+      switchTab('tab-dashboard', document.querySelectorAll('.nav-item')[0]);
+      document.querySelectorAll('#trackerForm input:not([type="date"])').forEach(i => i.value = '');
+    });
+
+    function deleteRecord(index) {
+      const realIndex = records.length - 1 - index;
+      records.splice(realIndex, 1);
+      updateUI();
+    }
+
+    /* Funções de Backup Discretas */
+    function exportBackup() {
+      if (records.length === 0) {
+        alert("Nenhum registro para exportar ainda.");
+        return;
+      }
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `backup_evolucao_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importBackup(event) {
+      const fileReader = new FileReader();
+      fileReader.onload = function(e) {
+        try {
+          const importedRecords = JSON.parse(e.target.result);
+          if (Array.isArray(importedRecords)) {
+            records = importedRecords;
+            updateUI();
+            alert("Backup restaurado com sucesso!");
+          } else {
+            alert("Formato de arquivo inválido.");
+          }
+        } catch (err) {
+          alert("Erro ao ler arquivo de backup.");
+        }
+      };
+      fileReader.readAsText(event.target.files[0]);
+    }
+
+    initChart();
+  </script>
+</body>
+</html>
