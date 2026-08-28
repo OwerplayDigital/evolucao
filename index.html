@@ -80,7 +80,6 @@
     .hero-card p { font-size: 0.78rem; font-weight: 500; opacity: 0.9; }
     .hero-card h2 { font-size: 1.15rem; font-weight: 800; margin-top: 2px; }
 
-    /* Card Destaque Principal: Peso */
     .kpi-main-card {
       background: var(--card);
       border: 1px solid rgba(236, 72, 153, 0.3);
@@ -437,10 +436,23 @@
   </div>
 
   <script>
-    document.getElementById('date').valueAsDate = new Date();
+    // Correção do fuso horário local no formulário
+    const now = new Date();
+    const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+    document.getElementById('date').value = localDate;
+
     let records = JSON.parse(localStorage.getItem('home_tracker_records') || '[]');
     let currentMetric = 'weight';
     let chart;
+
+    // Função para formatar a data sem bug de fuso horário
+    function formatDate(dateString) {
+      const parts = dateString.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}`;
+      }
+      return dateString;
+    }
 
     function switchTab(tabId, btn) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -527,7 +539,7 @@
         document.getElementById('kpiWeightDiff').innerText = '';
       }
 
-      chart.data.labels = records.map(r => new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
+      chart.data.labels = records.map(r => formatDate(r.date));
       chart.data.datasets[0].data = records.map(r => r[currentMetric] || null);
       chart.update();
 
@@ -535,7 +547,7 @@
       historyList.innerHTML = records.map((r, index) => `
         <div class="history-card">
           <div class="history-head">
-            <span>${new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR')} ${r.mood ? `<span class="mood-tag">${r.mood}</span>` : ''}</span>
+            <span>${formatDate(r.date)} ${r.mood ? `<span class="mood-tag">${r.mood}</span>` : ''}</span>
             <span style="color: #ef4444; cursor: pointer;" onclick="deleteRecord(${index})">✕</span>
           </div>
           <div class="history-details">
