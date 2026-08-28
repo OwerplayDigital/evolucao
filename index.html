@@ -247,26 +247,79 @@
       cursor: pointer;
     }
 
-    .history-card {
+    /* Estilo Ultra Enxuto do Histórico */
+    .history-card-clean {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--card-border);
       border-radius: 14px;
-      padding: 12px;
-      margin-bottom: 10px;
-    }
-    .history-head { 
-      display: flex; 
-      justify-content: space-between; 
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      font-size: 0.78rem; 
-      font-weight: 700; 
-      color: #f472b6; 
-      margin-bottom: 8px; 
+      cursor: pointer;
+      transition: background 0.2s;
     }
-    .history-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; font-size: 0.7rem; }
-    .history-item { background: rgba(0,0,0,0.25); padding: 6px; border-radius: 8px; text-align: center; }
-    .history-item span { display: block; color: var(--text-sub); font-size: 0.6rem; margin-bottom: 2px; }
-    .mood-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 8px; background: rgba(168, 85, 247, 0.2); color: #c084fc; font-weight: 600; }
+    .history-card-clean:active {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .history-date {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .history-arrow {
+      color: var(--primary);
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    /* Modal com Detalhes Completos */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    
+    .modal-content {
+      background: #161f30;
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 20px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+    }
+    .modal-header h3 { font-size: 1rem; color: #f472b6; }
+    .modal-close { background: none; border: none; color: #ef4444; font-size: 1.2rem; cursor: pointer; }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .modal-item {
+      background: rgba(0, 0, 0, 0.25);
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .modal-item label { font-size: 0.65rem; color: var(--text-sub); display: block; }
+    .modal-item val { font-size: 0.9rem; font-weight: 700; color: #fff; }
   </style>
 </head>
 <body>
@@ -420,6 +473,17 @@
     </div>
   </div>
 
+  <!-- Modal com Detalhes Completos da Medição -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalDate">--/--/----</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-grid" id="modalBody"></div>
+    </div>
+  </div>
+
   <div class="bottom-nav">
     <button class="nav-item active" onclick="switchTab('tab-dashboard', this)">
       <svg viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
@@ -436,7 +500,6 @@
   </div>
 
   <script>
-    // Correção do fuso horário local no formulário
     const now = new Date();
     const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
     document.getElementById('date').value = localDate;
@@ -445,11 +508,10 @@
     let currentMetric = 'weight';
     let chart;
 
-    // Função para formatar a data sem bug de fuso horário
     function formatDate(dateString) {
       const parts = dateString.split('-');
       if (parts.length === 3) {
-        return `${parts[2]}/${parts[1]}`;
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
       }
       return dateString;
     }
@@ -539,26 +601,58 @@
         document.getElementById('kpiWeightDiff').innerText = '';
       }
 
-      chart.data.labels = records.map(r => formatDate(r.date));
+      chart.data.labels = records.map(r => formatDate(r.date).slice(0, 5));
       chart.data.datasets[0].data = records.map(r => r[currentMetric] || null);
       chart.update();
 
       const historyList = document.getElementById('historyList');
       historyList.innerHTML = records.map((r, index) => `
-        <div class="history-card">
-          <div class="history-head">
-            <span>${formatDate(r.date)} ${r.mood ? `<span class="mood-tag">${r.mood}</span>` : ''}</span>
-            <span style="color: #ef4444; cursor: pointer;" onclick="deleteRecord(${index})">✕</span>
-          </div>
-          <div class="history-details">
-            <div class="history-item"><span>Peso</span><b>${r.weight ? r.weight + ' kg' : ' '}</b></div>
-            <div class="history-item"><span>Barriga</span><b>${r.belly ? r.belly + ' cm' : ' '}</b></div>
-            <div class="history-item"><span>Busto</span><b>${r.bust ? r.bust + ' cm' : ' '}</b></div>
-          </div>
+        <div class="history-card-clean" onclick="openModal(${index})">
+          <span class="history-date">${formatDate(r.date)}</span>
+          <span class="history-arrow">›</span>
         </div>
       `).reverse().join('');
 
       localStorage.setItem('home_tracker_records', JSON.stringify(records));
+    }
+
+    function openModal(index) {
+      const realIndex = records.length - 1 - index;
+      const r = records[realIndex];
+
+      document.getElementById('modalDate').innerText = `Medições de ${formatDate(r.date)}`;
+      
+      const labels = {
+        weight: 'Peso',
+        belly: 'Barriga',
+        bust: 'Busto',
+        hip: 'Quadril',
+        arm: 'Braço',
+        thigh: 'Coxa',
+        calf: 'Panturrilha',
+        neck: 'Pescoço'
+      };
+
+      const units = { weight: 'kg' };
+
+      let html = '';
+      if (r.mood) {
+        html += `<div class="modal-item" style="grid-column: span 2;"><label>Sentimento</label><val>${r.mood}</val></div>`;
+      }
+
+      for (let key in labels) {
+        if (r[key]) {
+          const unit = units[key] || 'cm';
+          html += `<div class="modal-item"><label>${labels[key]}</label><val>${r[key]} ${unit}</val></div>`;
+        }
+      }
+
+      document.getElementById('modalBody').innerHTML = html;
+      document.getElementById('detailModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').classList.remove('active');
     }
 
     document.getElementById('trackerForm').addEventListener('submit', (e) => {
@@ -582,12 +676,6 @@
       switchTab('tab-dashboard', document.querySelectorAll('.nav-item')[0]);
       document.querySelectorAll('#trackerForm input:not([type="date"])').forEach(i => i.value = '');
     });
-
-    function deleteRecord(index) {
-      const realIndex = records.length - 1 - index;
-      records.splice(realIndex, 1);
-      updateUI();
-    }
 
     function exportBackup() {
       if (records.length === 0) {
