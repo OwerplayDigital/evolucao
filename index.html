@@ -543,20 +543,26 @@
               bg.addColorStop(1, 'rgba(236, 72, 153, 0.0)');
               return bg;
             },
-            pointRadius: 4,
+            pointRadius: 5,
+            pointHoverRadius: 8,
             pointBackgroundColor: '#a855f7'
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
           plugins: { 
             legend: { display: false },
             tooltip: {
+              displayColors: false,
               callbacks: {
                 label: function(context) {
                   const unit = currentMetric === 'weight' ? 'kg' : 'cm';
-                  return ` ${context.parsed.y.toLocaleString('pt-BR')} ${unit}`;
+                  return `${context.parsed.y.toLocaleString('pt-BR')} ${unit}`;
                 }
               }
             }
