@@ -80,7 +80,7 @@
     .hero-card p { font-size: 0.78rem; font-weight: 500; opacity: 0.9; }
     .hero-card h2 { font-size: 1.15rem; font-weight: 800; margin-top: 2px; }
 
-    /* Card Destaque: Barriga */
+    /* Card Destaque Principal: Peso */
     .kpi-main-card {
       background: var(--card);
       border: 1px solid rgba(236, 72, 153, 0.3);
@@ -285,20 +285,28 @@
         <h2>Cada passo conta 🌸</h2>
       </div>
 
-      <!-- Card Destaque Principal: Barriga -->
+      <!-- Card Destaque Principal: Peso -->
       <div class="kpi-main-card">
         <div>
-          <div class="kpi-title">Barriga</div>
-          <div class="kpi-value" id="kpiBelly"></div>
+          <div class="kpi-title">Peso Atual</div>
+          <div class="kpi-value" id="kpiWeight"></div>
         </div>
         <div style="text-align: right;">
           <div class="kpi-title">Evolução Total</div>
-          <div class="kpi-badge" id="kpiBellyDiff"></div>
+          <div class="kpi-badge" id="kpiWeightDiff"></div>
         </div>
       </div>
 
-      <!-- Grid Duplo: Busto e Quadril -->
+      <!-- Grid Duplo: Barriga e Busto -->
       <div class="kpi-grid-2">
+        <div class="kpi-card">
+          <div>
+            <div class="kpi-title">Barriga</div>
+            <div class="kpi-value" id="kpiBelly"></div>
+          </div>
+          <div class="kpi-badge" id="kpiBellyDiff">Medida Chave</div>
+        </div>
+
         <div class="kpi-card">
           <div>
             <div class="kpi-title">Busto</div>
@@ -306,20 +314,13 @@
           </div>
           <div class="kpi-badge" id="kpiBustDiff">Tronco</div>
         </div>
-
-        <div class="kpi-card">
-          <div>
-            <div class="kpi-title">Quadril</div>
-            <div class="kpi-value" id="kpiHip"></div>
-          </div>
-          <div class="kpi-badge" id="kpiHipDiff">Silhueta</div>
-        </div>
       </div>
 
       <div class="section-card">
         <div class="section-title">Visualizar Progresso</div>
         <div class="pill-selector">
-          <button class="pill active" onclick="switchMetric('belly', this)">Barriga</button>
+          <button class="pill active" onclick="switchMetric('weight', this)">Peso</button>
+          <button class="pill" onclick="switchMetric('belly', this)">Barriga</button>
           <button class="pill" onclick="switchMetric('bust', this)">Busto</button>
           <button class="pill" onclick="switchMetric('hip', this)">Quadril</button>
           <button class="pill" onclick="switchMetric('arm', this)">Braço</button>
@@ -355,43 +356,48 @@
             </div>
           </div>
 
-          <!-- Campos Reordenados por Importância -->
           <div class="form-row">
             <div class="form-group">
-              <label>1. Barriga (cm)</label>
-              <input type="number" step="0.1" id="belly" placeholder="0.0" required>
+              <label>1. Peso (kg)</label>
+              <input type="number" step="0.1" id="weight" placeholder="0.0" required>
             </div>
             <div class="form-group">
-              <label>2. Busto (cm)</label>
+              <label>2. Barriga (cm)</label>
+              <input type="number" step="0.1" id="belly" placeholder="0.0">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>3. Busto (cm)</label>
               <input type="number" step="0.1" id="bust" placeholder="0.0">
             </div>
-          </div>
-
-          <div class="form-row">
             <div class="form-group">
-              <label>3. Quadril (cm)</label>
+              <label>4. Quadril (cm)</label>
               <input type="number" step="0.1" id="hip" placeholder="0.0">
             </div>
+          </div>
+
+          <div class="form-row">
             <div class="form-group">
-              <label>4. Braço (cm)</label>
+              <label>5. Braço (cm)</label>
               <input type="number" step="0.1" id="arm" placeholder="0.0">
+            </div>
+            <div class="form-group">
+              <label>6. Coxa (cm)</label>
+              <input type="number" step="0.1" id="thigh" placeholder="0.0">
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label>5. Coxa (cm)</label>
-              <input type="number" step="0.1" id="thigh" placeholder="0.0">
-            </div>
-            <div class="form-group">
-              <label>6. Panturrilha (cm)</label>
+              <label>7. Panturrilha (cm)</label>
               <input type="number" step="0.1" id="calf" placeholder="0.0">
             </div>
-          </div>
-
-          <div class="form-group">
-            <label>7. Pescoço (cm)</label>
-            <input type="number" step="0.1" id="neck" placeholder="0.0">
+            <div class="form-group">
+              <label>8. Pescoço (cm)</label>
+              <input type="number" step="0.1" id="neck" placeholder="0.0">
+            </div>
           </div>
 
           <button type="submit" class="btn-submit">Salvar Medição</button>
@@ -433,7 +439,7 @@
   <script>
     document.getElementById('date').valueAsDate = new Date();
     let records = JSON.parse(localStorage.getItem('home_tracker_records') || '[]');
-    let currentMetric = 'belly';
+    let currentMetric = 'weight';
     let chart;
 
     function switchTab(tabId, btn) {
@@ -492,13 +498,20 @@
         const latest = records[records.length - 1];
         const first = records[0];
 
+        document.getElementById('kpiWeight').innerText = latest.weight ? `${latest.weight} kg` : '';
         document.getElementById('kpiBelly').innerText = latest.belly ? `${latest.belly} cm` : '';
         document.getElementById('kpiBust').innerText = latest.bust ? `${latest.bust} cm` : '';
-        document.getElementById('kpiHip').innerText = latest.hip ? `${latest.hip} cm` : '';
+
+        if (latest.weight && first.weight) {
+          const weightDiff = (latest.weight - first.weight).toFixed(1);
+          document.getElementById('kpiWeightDiff').innerText = weightDiff <= 0 ? `${weightDiff} kg` : `+${weightDiff} kg`;
+        }
 
         if (latest.belly && first.belly) {
           const bellyDiff = (latest.belly - first.belly).toFixed(1);
           document.getElementById('kpiBellyDiff').innerText = bellyDiff <= 0 ? `${bellyDiff} cm` : `+${bellyDiff} cm`;
+        } else {
+          document.getElementById('kpiBellyDiff').innerText = 'Medida Chave';
         }
 
         if (latest.bust && first.bust) {
@@ -507,18 +520,11 @@
         } else {
           document.getElementById('kpiBustDiff').innerText = 'Tronco';
         }
-
-        if (latest.hip && first.hip) {
-          const hipDiff = (latest.hip - first.hip).toFixed(1);
-          document.getElementById('kpiHipDiff').innerText = hipDiff <= 0 ? `${hipDiff} cm` : `+${hipDiff} cm`;
-        } else {
-          document.getElementById('kpiHipDiff').innerText = 'Silhueta';
-        }
       } else {
+        document.getElementById('kpiWeight').innerText = '';
         document.getElementById('kpiBelly').innerText = '';
         document.getElementById('kpiBust').innerText = '';
-        document.getElementById('kpiHip').innerText = '';
-        document.getElementById('kpiBellyDiff').innerText = '';
+        document.getElementById('kpiWeightDiff').innerText = '';
       }
 
       chart.data.labels = records.map(r => new Date(r.date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
@@ -533,9 +539,9 @@
             <span style="color: #ef4444; cursor: pointer;" onclick="deleteRecord(${index})">✕</span>
           </div>
           <div class="history-details">
+            <div class="history-item"><span>Peso</span><b>${r.weight ? r.weight + ' kg' : ' '}</b></div>
             <div class="history-item"><span>Barriga</span><b>${r.belly ? r.belly + ' cm' : ' '}</b></div>
             <div class="history-item"><span>Busto</span><b>${r.bust ? r.bust + ' cm' : ' '}</b></div>
-            <div class="history-item"><span>Quadril</span><b>${r.hip ? r.hip + ' cm' : ' '}</b></div>
           </div>
         </div>
       `).reverse().join('');
@@ -550,7 +556,8 @@
       records.push({
         date: document.getElementById('date').value,
         mood: document.getElementById('mood').value,
-        belly: parseFloat(document.getElementById('belly').value),
+        weight: parseFloat(document.getElementById('weight').value),
+        belly: getV('belly'),
         bust: getV('bust'),
         hip: getV('hip'),
         arm: getV('arm'),
