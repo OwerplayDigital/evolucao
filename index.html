@@ -247,7 +247,6 @@
       cursor: pointer;
     }
 
-    /* Estilo Ultra Enxuto do Histórico */
     .history-card-clean {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--card-border);
@@ -274,7 +273,6 @@
       font-weight: 700;
     }
 
-    /* Modal com Detalhes Completos */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -337,7 +335,6 @@
         <h2>Cada passo conta 🌸</h2>
       </div>
 
-      <!-- Card Destaque Principal: Peso -->
       <div class="kpi-main-card">
         <div>
           <div class="kpi-title">Peso Atual</div>
@@ -349,7 +346,6 @@
         </div>
       </div>
 
-      <!-- Grid Duplo: Barriga e Busto -->
       <div class="kpi-grid-2">
         <div class="kpi-card">
           <div>
@@ -473,7 +469,6 @@
     </div>
   </div>
 
-  <!-- Modal com Detalhes Completos da Medição -->
   <div class="modal-overlay" id="detailModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -540,7 +535,7 @@
             data: [],
             borderColor: '#ec4899',
             borderWidth: 3,
-            tension: 0.4,
+            tension: 0.1,
             fill: true,
             backgroundColor: (context) => {
               const bg = context.chart.ctx.createLinearGradient(0, 0, 0, 180);
@@ -606,19 +601,24 @@
       chart.update();
 
       const historyList = document.getElementById('historyList');
-      historyList.innerHTML = records.map((r, index) => `
-        <div class="history-card-clean" onclick="openModal(${index})">
-          <span class="history-date">${formatDate(r.date)}</span>
-          <span class="history-arrow">›</span>
-        </div>
-      `).reverse().join('');
+      const reversedIndices = [...records.keys()].reverse();
+
+      historyList.innerHTML = reversedIndices.map(originalIndex => {
+        const r = records[originalIndex];
+        return `
+          <div class="history-card-clean" onclick="openModal(${originalIndex})">
+            <span class="history-date">${formatDate(r.date)}</span>
+            <span class="history-arrow">›</span>
+          </div>
+        `;
+      }).join('');
 
       localStorage.setItem('home_tracker_records', JSON.stringify(records));
     }
 
-    function openModal(index) {
-      const realIndex = records.length - 1 - index;
-      const r = records[realIndex];
+    function openModal(exactIndex) {
+      const r = records[exactIndex];
+      if (!r) return;
 
       document.getElementById('modalDate').innerText = `Medições de ${formatDate(r.date)}`;
       
@@ -641,7 +641,7 @@
       }
 
       for (let key in labels) {
-        if (r[key]) {
+        if (r[key] !== null && r[key] !== undefined && !isNaN(r[key])) {
           const unit = units[key] || 'cm';
           html += `<div class="modal-item"><label>${labels[key]}</label><val>${r[key]} ${unit}</val></div>`;
         }
