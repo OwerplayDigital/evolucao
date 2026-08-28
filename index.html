@@ -550,10 +550,29 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
+          plugins: { 
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const unit = currentMetric === 'weight' ? 'kg' : 'cm';
+                  return ` ${context.parsed.y.toLocaleString('pt-BR')} ${unit}`;
+                }
+              }
+            }
+          },
           scales: {
             x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 9 } } },
-            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 9 } } }
+            y: { 
+              grid: { color: 'rgba(255,255,255,0.05)' }, 
+              ticks: { 
+                color: '#94a3b8', 
+                font: { size: 9 },
+                callback: function(value) {
+                  return Number.isInteger(value) ? value : value.toFixed(1).replace('.', ',');
+                }
+              } 
+            }
           }
         }
       });
@@ -567,25 +586,25 @@
         const latest = records[records.length - 1];
         const first = records[0];
 
-        document.getElementById('kpiWeight').innerText = latest.weight ? `${latest.weight} kg` : '';
-        document.getElementById('kpiBelly').innerText = latest.belly ? `${latest.belly} cm` : '';
-        document.getElementById('kpiBust').innerText = latest.bust ? `${latest.bust} cm` : '';
+        document.getElementById('kpiWeight').innerText = latest.weight ? `${latest.weight.toString().replace('.', ',')} kg` : '';
+        document.getElementById('kpiBelly').innerText = latest.belly ? `${latest.belly.toString().replace('.', ',')} cm` : '';
+        document.getElementById('kpiBust').innerText = latest.bust ? `${latest.bust.toString().replace('.', ',')} cm` : '';
 
         if (latest.weight && first.weight) {
-          const weightDiff = (latest.weight - first.weight).toFixed(1);
-          document.getElementById('kpiWeightDiff').innerText = weightDiff <= 0 ? `${weightDiff} kg` : `+${weightDiff} kg`;
+          const weightDiff = (latest.weight - first.weight).toFixed(1).replace('.', ',');
+          document.getElementById('kpiWeightDiff').innerText = (latest.weight - first.weight) <= 0 ? `${weightDiff} kg` : `+${weightDiff} kg`;
         }
 
         if (latest.belly && first.belly) {
-          const bellyDiff = (latest.belly - first.belly).toFixed(1);
-          document.getElementById('kpiBellyDiff').innerText = bellyDiff <= 0 ? `${bellyDiff} cm` : `+${bellyDiff} cm`;
+          const bellyDiff = (latest.belly - first.belly).toFixed(1).replace('.', ',');
+          document.getElementById('kpiBellyDiff').innerText = (latest.belly - first.belly) <= 0 ? `${bellyDiff} cm` : `+${bellyDiff} cm`;
         } else {
           document.getElementById('kpiBellyDiff').innerText = 'Medida Chave';
         }
 
         if (latest.bust && first.bust) {
-          const bustDiff = (latest.bust - first.bust).toFixed(1);
-          document.getElementById('kpiBustDiff').innerText = bustDiff <= 0 ? `${bustDiff} cm` : `+${bustDiff} cm`;
+          const bustDiff = (latest.bust - first.bust).toFixed(1).replace('.', ',');
+          document.getElementById('kpiBustDiff').innerText = (latest.bust - first.bust) <= 0 ? `${bustDiff} cm` : `+${bustDiff} cm`;
         } else {
           document.getElementById('kpiBustDiff').innerText = 'Tronco';
         }
@@ -643,7 +662,8 @@
       for (let key in labels) {
         if (r[key] !== null && r[key] !== undefined && !isNaN(r[key])) {
           const unit = units[key] || 'cm';
-          html += `<div class="modal-item"><label>${labels[key]}</label><val>${r[key]} ${unit}</val></div>`;
+          const valFormatted = r[key].toString().replace('.', ',');
+          html += `<div class="modal-item"><label>${labels[key]}</label><val>${valFormatted} ${unit}</val></div>`;
         }
       }
 
@@ -657,12 +677,15 @@
 
     document.getElementById('trackerForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      const getV = id => document.getElementById(id).value ? parseFloat(document.getElementById(id).value) : null;
+      const getV = id => {
+        const val = document.getElementById(id).value;
+        return val ? parseFloat(val.replace(',', '.')) : null;
+      };
 
       records.push({
         date: document.getElementById('date').value,
         mood: document.getElementById('mood').value,
-        weight: parseFloat(document.getElementById('weight').value),
+        weight: parseFloat(document.getElementById('weight').value.replace(',', '.')),
         belly: getV('belly'),
         bust: getV('bust'),
         hip: getV('hip'),
